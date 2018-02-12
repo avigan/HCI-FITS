@@ -15,18 +15,38 @@ from pathlib import Path
 hci_version = 1.0
 
 
-def resolve_telescope(instrument):    
-    telescopes = {'naco':    'VLT',
-                  'sphere':  'VLT',
-                  'visir':   'VLT',
-                  'sinfoni': 'VLT',
-                  'niri':    'Gemini-N',
-                  'nici':    'Gemini-S',
-                  'gpi':     'Gemini-S',
-                  'nirc2':   'Keck-II',
-                  'nicmos':  'HST',
-                  'clio':    'MMT',
-                  'irac':    'Spitzer'}
+def resolve_instrument(instrument):
+    inst = instrument.upper()
+    if inst.lower().find('irdis') >= 0:
+        inst = 'SPHERE-IRDIS'
+    elif inst.lower().find('ifs') >= 0:
+        inst = 'SPHERE-IFS'
+    elif inst.lower().find('zimpol') >= 0:
+        inst = 'SPHERE-ZIMPOL'
+    else:
+        inst = instrument
+
+    if inst != instrument:
+        print('Warning: changing instrument name from {0} to {1}'.format(instrument, inst))
+        
+    return inst
+
+
+def resolve_telescope(instrument):
+    telescopes = {'naco':          'VLT',
+                  'sphere':        'VLT',
+                  'sphere-irdis':  'VLT',
+                  'sphere-ifs':    'VLT',
+                  'sphere-zimpol': 'VLT',
+                  'visir':         'VLT',
+                  'sinfoni':       'VLT',
+                  'niri':          'Gemini-N',
+                  'nici':          'Gemini-S',
+                  'gpi':           'Gemini-S',
+                  'nirc2':         'Keck-II',
+                  'nicmos':        'HST',
+                  'clio':          'MMT',
+                  'irac':          'Spitzer'}
     telescope = telescopes.get(instrument.lower(), None)
 
     if telescope is None:
@@ -38,6 +58,10 @@ def resolve_telescope(instrument):
     return telescope
 
 
+# def resolve_filter(filtname, instrument):
+#     return name, wave, dwave
+
+    
 class HCIExtension:
     '''
     HCI-FITS extension class
@@ -222,10 +246,11 @@ class HCIDataset:
 
     @instrument.setter
     def instrument(self, instrument):
-        self._instrument = instrument
+        # normalize instrument name as much as possible 
+        self._instrument = resolve_instrument(instrument)
         
         # automatically fill telescope if possible
-        self._telescope = resolve_telescope(instrument)
+        self._telescope = resolve_telescope(self._instrument)
 
     @property
     def date(self):
@@ -239,6 +264,10 @@ class HCIDataset:
     def filter(self):
         return self._filter
 
+    @filter.setter
+    def filter(self, filt):
+        self._filter = filt
+    
     @property
     def wave(self):
         return self._wave
@@ -310,7 +339,7 @@ class HCIDataset:
         pass
     
     
-ds = HCIDataset.from_observation('HIP65426', '2017-03-01', 'SPHERE', 2, number_of_candidates=3)
+ds = HCIDataset.from_observation('HIP65426', '2017-03-01', 'IRDIS', 2, number_of_candidates=3)
 
 
 ##################################################
