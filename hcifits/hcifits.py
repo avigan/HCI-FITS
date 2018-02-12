@@ -132,23 +132,23 @@ class HCIDataset:
         '''
 
         # properties
-        self._target          = None
-        self._simbad          = None
-        self._coord           = None
-        self._instrument      = None
-        self._telescope       = None
-        self._filter          = None
-        self._wave            = None
-        self._bandwidth       = None
-        self._pixscale        = None
+        self._target     = None
+        self._simbad     = None
+        self._coord      = None
+        self._instrument = None
+        self._telescope  = None
+        self._filter     = None
+        self._wave       = None
+        self._bandwidth  = None
+        self._pixscale   = None
 
         # extensions
-        self._data_info       = None
-        self._reduced_data    = None
-        self._snr_map         = None
-        self._sensitivity_map = None
-        self._detection_limit = None
-        self._detections_info = None
+        self._data_info        = None
+        self._reduced_data     = None
+        self._snr_map          = None
+        self._sensitivity_map  = None
+        self._detection_limit  = None
+        self._source_detection = None
 
     @classmethod
     def from_file(self, filename):
@@ -212,8 +212,8 @@ class HCIDataset:
             source_detection_table.add_columns([c01, c02, c03, c04, c05, c06, c07, c08, c09, c10,
                                                 c11, c12, c13, c14, c15, c16, c17, c18, c19, c20])
 
-            ds._detections_info      = HCIExtension('BINTABLE', 'SOURCE_DETECTION')
-            ds._detections_info.data = source_detection_table
+            ds._source_detection      = HCIExtension('BINTABLE', 'SOURCE_DETECTION')
+            ds._source_detection.data = source_detection_table
 
         return ds
     
@@ -289,7 +289,7 @@ class HCIDataset:
         self._target = target
 
         # try resolving the target with SIMBAD
-        self.resolve_target()
+        self._resolve_target()
 
     @property
     def simbad_target(self):
@@ -317,10 +317,10 @@ class HCIDataset:
         return self._coord.dec.deg
 
     ##################################################
-    # Generic class methods
+    # Internal class methods
     ##################################################
 
-    def resolve_target(self):
+    def _resolve_target(self):
         target = self._target
         if target is None:
             print('Warning: target name not set. Cannot resolve coordinates.')
@@ -334,10 +334,30 @@ class HCIDataset:
         else:
             self._coord  = SkyCoord(info['RA'][0], info['DEC'][0], frame='icrs', unit=(u.hourangle, u.deg))
             self._simbad = info['MAIN_ID'][0].decode('utf-8')
+    
+    ##################################################
+    # Generic class methods
+    ##################################################
 
     def insert_data_information():
         pass
     
+    def insert_reduced_data():
+        pass
+
+    def insert_snr_map():
+        pass
+
+    def insert_sensitivity_map():
+        pass
+
+    def insert_detection_limit():
+        pass
+
+    def insert_source_detection():
+        pass
+
+
     
 ds = HCIDataset.from_observation('HIP65426', '2017-03-01', 'IRDIS', 2, number_of_candidates=3)
 
